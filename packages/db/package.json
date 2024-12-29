@@ -1,0 +1,21 @@
+{
+    "name": "@workspace/db",
+    "version": "0.0.1",
+    "main": "index.ts",
+    "type": "module",
+    "exports": {
+        ".": "./index.ts",
+        "./drizzle": "./drizzle/schema.ts"
+    },
+    "dependencies": {
+        "drizzle-orm": "^0.38.3",
+        "postgres": "^3.4.5"
+    },
+    "devDependencies": {
+        "drizzle-kit": "^0.30.1"
+    },
+    "scripts": {
+        "db:pull": "drizzle-kit pull",
+        "db:push": "drizzle-kit push"
+    }
+}

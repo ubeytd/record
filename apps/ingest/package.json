@@ -1,0 +1,21 @@
+{
+  "name": "ingest",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@ai-sdk/groq": "^1.0.9",
+    "@aws-sdk/client-s3": "^3.717.0",
+    "@aws-sdk/client-sqs": "^3.716.0",
+    "@workspace/db": "workspace:*",
+    "@aws-sdk/s3-request-presigner": "^3.717.0",
+    "ai": "^4.0.22",
+    "groq-sdk": "^0.9.1",
+    "lambda-stream": "^0.5.0",
+    "resend": "^4.0.1"
+  }
+}
