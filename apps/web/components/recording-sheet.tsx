@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useTransition } from 'react'
 import { Sheet, SheetContent } from "@workspace/ui/components/sheet"
 import { AudioWave } from './audio-wave'
 import { Button } from "@workspace/ui/components/button"
-import { X, Mic } from 'lucide-react'
+import { X, Mic, Loader2 } from 'lucide-react'
 import { uploadRecording } from '@/actions'
 import { createClient } from '@/app/lib/supabase/client'
 
@@ -17,7 +17,8 @@ interface RecordingSheetProps {
 export function RecordingSheet({ isOpen, onOpenChange, onComplete }: RecordingSheetProps) {
   const [isRecording, setIsRecording] = useState(false)
   const [duration, setDuration] = useState(0)
-  const [title] = useState("New Recording")
+  const [title, setTitle] = useState("New Recording")
+  const [isPending, startTransition] = useTransition()
   const [audioStream, setAudioStream] = useState<MediaStream>()
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>()
   const [audioChunks, setAudioChunks] = useState<Blob[]>([])
@@ -102,28 +103,44 @@ export function RecordingSheet({ isOpen, onOpenChange, onComplete }: RecordingSh
         reader.onloadend = async function() {
           const base64data = (reader.result as string).split(',')[1];
           
-          // Upload the recording
-          const key = await uploadRecording(base64data as string);
-          
-          // Create a temporary URL for local playback
-          const url = URL.createObjectURL(blob);
-          onComplete(url, duration / 1000);
+          setTitle("Uploading recording...")
+          // Upload the recording with transition
+          startTransition(async () => {
+            await uploadRecording(base64data as string);
+            
+            // Create a temporary URL for local playback
+            const url = URL.createObjectURL(blob);
+            onComplete(url, duration / 1000);
+
+            // Clean up and close only after upload is complete
+            if (audioStream) {
+              audioStream.getTracks().forEach(track => track.stop())
+              setAudioStream(undefined)
+            }
+            
+            setIsRecording(false)
+            setIsMiniRecorder(false)
+            setDuration(0)
+            setProgress(0)
+            onOpenChange(false)
+          });
         }
       } catch (error) {
         console.error('Error processing recording:', error);
       }
+    } else {
+      // If there's no recording to upload, just clean up and close
+      if (audioStream) {
+        audioStream.getTracks().forEach(track => track.stop())
+        setAudioStream(undefined)
+      }
+      
+      setIsRecording(false)
+      setIsMiniRecorder(false)
+      setDuration(0)
+      setProgress(0)
+      onOpenChange(false)
     }
-
-    if (audioStream) {
-      audioStream.getTracks().forEach(track => track.stop())
-      setAudioStream(undefined)
-    }
-    
-    setIsRecording(false)
-    setIsMiniRecorder(false)
-    setDuration(0)
-    setProgress(0)
-    onOpenChange(false)
   }
 
   const handleSheetOpenChange = (open: boolean) => {
@@ -152,27 +169,40 @@ export function RecordingSheet({ isOpen, onOpenChange, onComplete }: RecordingSh
           <div className="w-full h-1 bg-white/20 rounded-full mx-auto my-2 max-w-[48px]" />
           
           <div className="flex flex-col items-center justify-between h-[calc(100%-24px)] p-4">
-            <h2 className="text-lg font-semibold text-white mb-2">{title}</h2>
+            {isPending ? (
+              <div className="flex flex-col items-center justify-center flex-1 w-full">
+                <Loader2 className="h-8 w-8 animate-spin mb-4" />
+                <h2 className="text-lg font-semibold text-white">
+                  {title}
+                </h2>
+              </div>
+            ) : (
+              <>
+                <h2 className="text-lg font-semibold text-white mb-2">
+                  {title}
+                </h2>
 
-            <div className="text-3xl font-medium text-white mb-4">
-              {formatDuration(duration)}
-            </div>
+                <div className="text-3xl font-medium text-white mb-4">
+                  {formatDuration(duration)}
+                </div>
 
-            <div className="w-full h-24 relative mb-6">
-              <AudioWave 
-                isRecording={isRecording}
-                audioStream={audioStream}
-                color="#FFFFFF"
-              />
-            </div>
+                <div className="w-full h-24 relative mb-6">
+                  <AudioWave 
+                    isRecording={isRecording}
+                    audioStream={audioStream}
+                    color="#FFFFFF"
+                  />
+                </div>
 
-            <Button 
-              onClick={stopRecording}
-              className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center mb-4 transition-transform hover:scale-105 active:scale-95"
-              aria-label="Stop recording"
-            >
-              <div className="w-6 h-6 rounded-sm bg-black"></div>
-            </Button>
+                <Button 
+                  onClick={stopRecording}
+                  className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center mb-4 transition-transform hover:scale-105 active:scale-95"
+                  aria-label="Stop recording"
+                >
+                  <div className="w-6 h-6 rounded-sm bg-black"></div>
+                </Button>
+              </>
+            )}
           </div>
         </SheetContent>
       </Sheet>
