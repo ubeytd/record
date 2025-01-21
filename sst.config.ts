@@ -38,6 +38,8 @@ export default $config({
       link: [bucket],
       environment: {
         GROQ_API_KEY: process.env.GROQ_API_KEY || "",
+        GROQ_API_KEY_II: process.env.GROQ_API_KEY_II || "",
+        GROQ_API_KEY_III: process.env.GROQ_API_KEY_III || "",
         DATABASE_URL: process.env.DATABASE_URL || "",
       }
     });
@@ -46,6 +48,8 @@ export default $config({
       link: [bucket],
       environment: {
         GROQ_API_KEY: process.env.GROQ_API_KEY || "",
+        GROQ_API_KEY_II: process.env.GROQ_API_KEY_II || "",
+        GROQ_API_KEY_III: process.env.GROQ_API_KEY_III || "",
         RESEND_API_KEY: process.env.RESEND_API_KEY || "",
         DATABASE_URL: process.env.DATABASE_URL || "",
       }
@@ -62,7 +66,12 @@ export default $config({
         DATABASE_URL: process.env.DATABASE_URL || "",
         NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
         NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+      },
+      dev: {
+        command: "bun dev",
+        directory: "apps/web",
       }
+      
     });
     return {
       appUrl: app.url,

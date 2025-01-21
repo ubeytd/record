@@ -3,6 +3,7 @@
 import { getRecordingById } from '@/actions'
 import { GlobalPlayer } from '@/components/global-player'
 import { Button } from '@workspace/ui/components/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/components/tabs'
 import { ChevronLeft, Copy, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
@@ -66,68 +67,83 @@ export default function RecordingDetails({ recording: initialRecording, recordin
       </header>
 
       {/* Content */}
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-        {recording.data && (
-          <div className="relative group">
-            <div className="absolute -inset-px bg-gradient-to-r from-white/[0.08] to-white/[0.05] rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="relative bg-white/[0.04] hover:bg-white/[0.06] rounded-xl p-6 backdrop-blur-xl border border-white/[0.06] transition-colors">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-medium text-white/90">Transcription</h2>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white/40 hover:text-white hover:bg-white/10 rounded-lg
-                           transition-all duration-200 hover:scale-105 active:scale-95"
-                  onClick={() => handleCopy(recording.data!, 'transcription')}
-                >
-                  {copiedMap['transcription'] ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              <div className="prose prose-invert max-w-none prose-p:text-white/70 hover:prose-p:text-white/90 
-                            prose-headings:text-white prose-strong:text-white/90 prose-a:text-blue-400
-                            prose-p:transition-colors prose-p:duration-200">
-                <ReactMarkdown>
-                  {recording.data}
-                </ReactMarkdown>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {recording.summary && (
-          <div className="relative group">
-            <div className="absolute -inset-px bg-gradient-to-r from-white/[0.08] to-white/[0.05] rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="relative bg-white/[0.04] hover:bg-white/[0.06] rounded-xl p-6 backdrop-blur-xl border border-white/[0.06] transition-colors">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-medium text-white/90">Summary</h2>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white/40 hover:text-white hover:bg-white/10 rounded-lg
-                           transition-all duration-200 hover:scale-105 active:scale-95"
-                  onClick={() => handleCopy(recording.summary!, 'summary')}
-                >
-                  {copiedMap['summary'] ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              <div className="prose prose-invert max-w-none prose-p:text-white/70 hover:prose-p:text-white/90 
-                            prose-headings:text-white prose-strong:text-white/90 prose-a:text-blue-400
-                            prose-p:transition-colors prose-p:duration-200">
-                <ReactMarkdown>
-                  {recording.summary}
-                </ReactMarkdown>
+      <main className="max-w-3xl mx-auto px-4 py-8">
+        <Tabs defaultValue="transcription" className="w-full">
+          <TabsList className="w-full bg-white/[0.04] border border-white/[0.06]">
+            <TabsTrigger 
+              value="transcription" 
+              className="flex-1 text-white/60 data-[state=active]:text-white data-[state=active]:bg-white/[0.08]"
+            >
+              Transcription
+            </TabsTrigger>
+            <TabsTrigger 
+              value="summary" 
+              className="flex-1 text-white/60 data-[state=active]:text-white data-[state=active]:bg-white/[0.08]"
+            >
+              AI Summary
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="transcription" className="mt-6">
+            <div className="relative group">
+              <div className="absolute -inset-px bg-gradient-to-r from-white/[0.08] to-white/[0.05] rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative bg-white/[0.04] hover:bg-white/[0.06] rounded-xl p-6 backdrop-blur-xl border border-white/[0.06] transition-colors">
+                <div className="flex items-center justify-end mb-4">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white/40 hover:text-white hover:bg-white/10 rounded-lg
+                             transition-all duration-200 hover:scale-105 active:scale-95"
+                    onClick={() => recording.data && handleCopy(recording.data, 'transcription')}
+                  >
+                    {copiedMap['transcription'] ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <div className="prose prose-invert max-w-none prose-p:text-white/70 hover:prose-p:text-white/90 
+                              prose-headings:text-white prose-strong:text-white/90 prose-a:text-blue-400
+                              prose-p:transition-colors prose-p:duration-200">
+                  <ReactMarkdown>
+                    {recording.data || 'No transcription available'}
+                  </ReactMarkdown>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          </TabsContent>
+
+          <TabsContent value="summary" className="mt-6">
+            <div className="relative group">
+              <div className="absolute -inset-px bg-gradient-to-r from-white/[0.08] to-white/[0.05] rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative bg-white/[0.04] hover:bg-white/[0.06] rounded-xl p-6 backdrop-blur-xl border border-white/[0.06] transition-colors">
+                <div className="flex items-center justify-end mb-4">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white/40 hover:text-white hover:bg-white/10 rounded-lg
+                             transition-all duration-200 hover:scale-105 active:scale-95"
+                    onClick={() => recording.summary && handleCopy(recording.summary, 'summary')}
+                  >
+                    {copiedMap['summary'] ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <div className="prose prose-invert max-w-none prose-p:text-white/70 hover:prose-p:text-white/90 
+                              prose-headings:text-white prose-strong:text-white/90 prose-a:text-blue-400
+                              prose-p:transition-colors prose-p:duration-200">
+                  <ReactMarkdown>
+                    {recording.summary || 'No summary available yet'}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
 
       <GlobalPlayer initialRecordingId={recordingId} forceShow={true} />

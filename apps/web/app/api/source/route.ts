@@ -11,6 +11,8 @@ export async function GET(request: NextRequest) {
     }
     const command = new GetObjectCommand({
         Key: key,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         Bucket: Resource.IngestBucket.name,
     })
     const url =  await getSignedUrl(s3, command, {
